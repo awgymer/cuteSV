@@ -14,6 +14,17 @@ The force calling module has been disabled in cuteSV, please install [cuteFC](ht
 
 A new wiki page about diploid-assembly-based SV detection using cuteSV has been established. More details please see [here](https://github.com/tjiangHIT/cuteSV/wiki/Diploid-assembly-based-SV-detection-using-cuteSV).
 
+
+#### You can also try our latest SV detection tools:
+
+Real‑time SV calling for nanopore devices -> [cuteSV-OL](https://github.com/gwmHIT/cuteSV-OL)  [[paper](https://academic.oup.com/bioinformatics/article/42/1/btaf668/8382785?login=false)]
+
+Haplotype‑aware SV detection -> [cuteHap](https://github.com/Meltpinkg/cuteHap)  [[paper](https://advanced.onlinelibrary.wiley.com/doi/10.1002/advs.202519314)]
+
+Pangenome-based SV calling -> [SVPG](https://github.com/coopsor/SVPG)  [[paper](https://www.biorxiv.org/content/10.1101/2025.07.11.664486v4)]
+
+Somatic SV discovery -> [SomaSV](https://github.com/eioyuou/SomaSV)  [[paper](https://www.biorxiv.org/content/10.64898/2026.02.16.706063v1)]
+
 ---
 ### Getting Start
 	                                               __________    __       __
@@ -46,6 +57,12 @@ The benchmark results of cuteSV on the HG002 human sample are below:
 
 BTW, we used [Truvari](https://github.com/spiralgenetics/truvari) to calculate the recall, precision, and f-measure.
 For more detailed implementation of SV benchmarks, we show an example [here](https://github.com/tjiangHIT/sv-benchmark).
+
+---
+### Citation
+Jiang T et al. Long-read-based human genomic structural variation detection with cuteSV. Genome Biol 21, 189 (2020). https://doi.org/10.1186/s13059-020-02107-y
+
+Jiang T et al. cuteFC: regenotyping structural variants through an accurate and efficient force-calling method. Genome Biol 26, 166 (2025). https://doi.org/10.1186/s13059-025-03642-2
 
 
 ---
@@ -258,12 +275,6 @@ Please cite the manuscript of cuteSV before using these callsets.
 	5.Remove a few redundant functions which will reduce code readability.
 
 
----
-### Citation
-Jiang T et al. Long-read-based human genomic structural variation detection with cuteSV. Genome Biol 21, 189 (2020). https://doi.org/10.1186/s13059-020-02107-y
-
-Cao S et al. Re-genotyping structural variants through an accurate force-calling method. bioRxiv 2022.08.29.505534; doi: https://doi.org/10.1101/2022.08.29.505534
-	
 ---
 ### Contact
 For advising, bug reporting and requiring help, please post on [Github Issue](https://github.com/tjiangHIT/cuteSV/issues) or contact tjiang@hit.edu.cn.
