@@ -314,7 +314,14 @@ def generate_output(args, semi_result, reference, chrom, temporary_dir):
         elif i[1] == "DUP":
             if abs(int(float(i[3]))) > args.max_size and args.max_size != -1:
                 continue
-            cal_end = int(i[2]) + 1 + abs(int(float(i[3])))
+            # i[2] (breakpoint_1) originates in analysis_split_read()
+            # (src/cuteSV/cuteSV) and is a 0-based cut-point coordinate, so read as a
+            # 1-based position it already names the base before the duplicated
+            # segment - the padding base VCF asks for - and breakpoint_2
+            # (breakpoint_1 + SVLEN) names its last base. Compare the DEL branch
+            # above, which anchors the same way.
+            pos_dup = int(i[2])
+            cal_end = pos_dup + abs(int(float(i[3])))
             info_list = "{PRECISION};SVTYPE={SVTYPE};SVLEN={SVLEN};END={END};RE={RE};STRAND=-+{RNAMES}".format(
                 PRECISION = "IMPRECISE" if i[6] == "0/0" else "PRECISE", 
                 SVTYPE = i[1], 
@@ -331,10 +338,10 @@ def generate_output(args, semi_result, reference, chrom, temporary_dir):
                 filter_lable = "PASS"
             else:
                 filter_lable = "PASS" if float(i[9]) >= 5.0 else "q5"
-            ref_seq = ref_chrom[int(i[2])]
+            ref_seq = ref_chrom[max(pos_dup - 1, 0)]
             lines.append((i[1],"{CHR}\t{POS}\t{ID}\t{REF}\t{ALT}\t{QUAL}\t{PASS}\t{INFO}\t{FORMAT}\t{GT}:{DR}:{RE}:{PL}:{GQ}\n".format(
                 CHR = i[0], 
-                POS = str(int(i[2]) + 1), 
+                POS = str(pos_dup), 
                 ID = "cuteSV.%s.<SVID>"%(i[1]),
                 REF = ref_seq.translate(trans_table),
                 ALT = "<%s>"%(i[1]), 
@@ -350,19 +357,14 @@ def generate_output(args, semi_result, reference, chrom, temporary_dir):
         elif i[1] == "INV":
             if abs(int(float(i[3]))) > args.max_size and args.max_size != -1:
                 continue
-            # i[2] (breakpoint_1) originates in analysis_inv() (src/cuteSV/cuteSV) and is
-            # an end-type ref_end coordinate (already a valid 1-based position, since
-            # pysam's reference_end is 0-based-exclusive) for head-to-head ("++")
-            # inversions, but a start-type ref_start coordinate (0-based, needs +1) for
-            # tail-to-tail ("--") inversions. i[7] (the "++"/"--" tag, already carried
-            # through for the INFO STRAND field) tells us which. Compare the equivalent
-            # BND fix above for the mate coordinate and the primary POS column.
-            if i[7] == "++":
-                pos_inv = int(i[2])
-                ref_idx = max(pos_inv - 1, 0)
-            else:
-                pos_inv = int(i[2]) + 1
-                ref_idx = int(i[2])
+            # i[2] (breakpoint_1) originates in analysis_inv() (src/cuteSV/cuteSV).
+            # Both inversion breakpoints are 0-based cut-point coordinates - taken
+            # from ref_end for head-to-head ("++") signatures and from ref_start for
+            # tail-to-tail ("--") ones - so in either orientation breakpoint_1 read
+            # as a 1-based position names the base before the inverted segment, and
+            # breakpoint_2 (breakpoint_1 + SVLEN) names its last base.
+            pos_inv = int(i[2])
+            ref_idx = max(pos_inv - 1, 0)
             cal_end = pos_inv + abs(int(float(i[3])))
             info_list = "{PRECISION};SVTYPE={SVTYPE};SVLEN={SVLEN};END={END};RE={RE};STRAND={STRAND}{RNAMES}".format(
                 PRECISION = "IMPRECISE" if i[6] == "0/0" else "PRECISE",
