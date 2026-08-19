@@ -239,6 +239,25 @@ def duipai(svs_list, reads_list, iteration_dict, primary_num_dict, cover2_dict, 
         idx += 1
     print('Correct iteration cover %d; overlap %d'%(correct_cover, correct_overlap))
 
+def emitted_vcf_pos(record):
+    # All signature coordinates are 0-based cut points, which name the base to the
+    # left of a breakpoint when they are read as 1-based positions. That is the
+    # base VCF anchors on for DEL, INS, DUP and INV, and for BND types A/B, whose
+    # ALT carries the anchor base in front of the bracket pair. Types C/D carry it
+    # behind, so they anchor on the base to the right of the cut and are the only
+    # records written one base further on.
+    #
+    # record[1] is still the ALT template built in resolution_TRA(), where that
+    # anchor base is the placeholder "N". The real reference base is substituted
+    # into it further down, when the record is written.
+    #
+    # Sort on the position each record is written with, so that the output file
+    # stays in POS order.
+    pos = int(record[2])
+    if record[1] in ["DEL", "INS", "DUP", "INV"]:
+        return pos
+    return pos if record[1][0] == 'N' else pos + 1
+
 def generate_output(args, semi_result, reference, chrom, temporary_dir):
     
     '''
@@ -249,7 +268,7 @@ def generate_output(args, semi_result, reference, chrom, temporary_dir):
     # genotype_trigger = TriggerGT[args.genotype]
     
     f=open("%sresults/%s.pickle"%(temporary_dir,chrom), "wb")
-    semi_result.sort(key = lambda x:int(x[2]))
+    semi_result.sort(key = emitted_vcf_pos)
     action = args.genotype
     fa_file = pysam.FastaFile(reference)
     try:
